@@ -25,49 +25,45 @@
         </nav>
     </div>
     <div class="container" style="padding-top: 64px; padding-bottom: 64px;">
-              <div class="col-md-6">
+            <div class="col-md-6">
                 <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
                     <div class="col p-4 d-flex flex-column position-static">
                         <strong class="d-inline-block text-primary">โต๊ะที่ 7</strong>
                     <table class="table" style="margin-bottom: 0;">
                         <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">รายการ</th>
-                            <th align=“right” scope="col"><th>ราคา ฿</th></th>
-                        </tr>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">รายการ</th>
+                                <th align=“right” scope="col"><th>ราคา ฿</th></th>
+                            </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <th scope="row">x1</th>
-                            <td>
-                            ก๋วยเตี๋ยวเส้นเล็กน้ำตก <br>
-                            <h12 style="margin-bottom: 0; margin-top: 2px;">*ไม่ใส่ผัก</h12>
-                            </td>
-                            <td align=“right”><td>40</td></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">x1</th>
-                            <td>ข้าวเปล่า</td>
-                            <td align=“right”><td>10</td></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">x1</th>
-                            <td>น้ำแดง</td>
-                            <td align=“right”><td>12</td></td>
-                        </tr>
+                            {% for dict in datas %}
+                            {% for key, value in dict.items() %}
+                            <tr>
+                                <th scope="row">x1</th>
+                                <td>
+                                <b>{{ key }}</b> <br>
+                                    {% for option in value %}
+                                    <h12 style="margin-bottom: 0; margin-top: 2px;">{{ option }}</h12>
+                                    {% endfor %}
+                                </td>
+                                <td align=“right”><td>40</td></td>
+                            </tr>
+                            {% endfor %}
+                            {% endfor %}
                         </tbody>
                         <tfoot>
-                        <tr>
-                            <th scope="col">รวม</th>
-                            <th scope="col"></th>
-                            <th align=“right” scope="col"><th>62</th></th>
-                        </tr>
+                            <tr>
+                                <th scope="col">รวม</th>
+                                <th scope="col"></th>
+                                <th align=“right” scope="col"><th>62</th></th>
+                            </tr>
                         </tfoot>
                     </table>
-                  </div>
                 </div>
-            ` </div>
+            </div>
+        </div>
     </div>
 
     <div class="fixed-bottom">

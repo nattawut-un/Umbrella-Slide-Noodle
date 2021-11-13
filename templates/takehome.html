@@ -24,12 +24,14 @@
             <h3>กรุณากรอกชื่อ</h3>
         <br>
         </div>
+        <form method='post' action='{{ url_for('home') }}'>
         <div class="input-group mb-3">
-            <input type="text" class="form-control" placeholder="ชื่อของคุณ" aria-label="Recipient's username">
-          </div>
-        <div class="d-grid gap-2 col-6 mx-auto">
-            <a href="/home" class="btn btn-primary" type="button">เข้าสู่ระบบ</a>
+          <input type="text" class="form-control" placeholder="ชื่อของคุณ" aria-label="Recipient's username" name='name'>
         </div>
+        <div class="d-grid gap-2 col-6 mx-auto">
+          <button type='submit' class="btn btn-primary">เข้าสู่ระบบ</button>
+        </div>
+        </form>
         <div class="alert alert-danger d-flex align-items-center" role="alert" style="margin-top: 10px;">
             <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
             <div>

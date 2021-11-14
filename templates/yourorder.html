@@ -15,7 +15,7 @@
     <div class="fixed-top">
         <nav class="navbar navbar-light bg-light">
             <form class="container-fluid justify-content-start">
-                <a href="/menu" class="btn btn-light" type="button">
+                <a href="/home" class="btn btn-light" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
                     </svg>
@@ -25,6 +25,7 @@
         </nav>
     </div>
     <div class="container" style="padding-top: 64px; padding-bottom: 64px;">
+      {% for i in datas %}
       <div class="accordion" id="accordionPanelsStayOpenExample">
         <div class="accordion-item">
           <h2 class="accordion-header" id="panelsStayOpen-headingOne">
@@ -34,15 +35,11 @@
           </h2>
           <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
             <div class="accordion-body">
-              <div class="col-md-6">
+              <div class="col-md-12">
                 <div class="col d-flex flex-column position-static">
                   <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                     <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="btnradio1">กำลังปรุง</label>
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="btnradio2">เสร็จสิ้น</label>
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="btnradio3">เก็บเงิน</label>
+                    <label class="btn btn-outline-primary" for="btnradio1">สถานะ</label>
                   </div>
                   <table class="table" style="margin-bottom: 0;">
                     <thead>
@@ -78,8 +75,8 @@
           </div>
         </div>
       </div>
+      {% endfor %}
     </div>
-
     <div class="fixed-bottom">
         <nav class="navbar navbar-light bg-light" style="margin-bottom: 0%; margin-top: 10px;">
             <form class="container-fluid justify-content-end" style="display: block;">

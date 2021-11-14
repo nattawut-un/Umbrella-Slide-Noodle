@@ -8,7 +8,7 @@ app = Flask(__name__)
 connection = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="Baszaa1234",
+    password="Nutaya.k21765",
     database='menu'
 )
 curs = connection.cursor()
@@ -79,11 +79,15 @@ def option_list():
         pick = request.form['pick']
     return render_template('noodle.html', pick=pick, datas=row, each_option=each_option)
 
-@app.route('/order', methods=['GET', 'POST'])
+@app.route('/ordersummary', methods=['GET', 'POST'])
 def order_summary():
     curs.execute('SELECT menus FROM users WHERE id = 0')
     orders = json.loads(curs.fetchall()[0][0].replace("'", '"'))
     return render_template('ordersummary.html', datas=orders)
+
+@app.route('/complete')
+def complete():
+    return render_template('complete.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

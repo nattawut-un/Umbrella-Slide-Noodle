@@ -24,17 +24,17 @@
             </form>
         </nav>
     </div>
-    <div class="container" style="padding-top: 64px; padding-bottom: 64px;">
-            <div class="col-md-6">
-                <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+    <div class="container" style="padding-top: 45px; padding-bottom: 30px;">
+            <div class="col-md-12" align="left">
+                <div class="row">
                     <div class="col p-4 d-flex flex-column position-static">
                         <strong class="d-inline-block text-primary">โต๊ะที่ 7</strong>
                     <table class="table" style="margin-bottom: 0;">
                         <thead>
                             <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">รายการ</th>
-                                <th align=“right” scope="col"><th>ราคา ฿</th></th>
+                                <th>#</th>
+                                <th>รายการ</th>
+                                <th>ราคา฿</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -45,10 +45,13 @@
                                 <td>
                                 <b>{{ key }}</b> <br>
                                     {% for option in value %}
-                                    <h12 style="margin-bottom: 0; margin-top: 2px;">{{ option }}</h12>
+                                    <h12 style="margin-bottom: 0; margin-top: 2px;">*{{ option }}</h12>
                                     {% endfor %}
                                 </td>
-                                <td align=“right”><td>40</td></td>
+                                <td>
+                                    40<br>
+                                    <button type="button" class="btn btn-danger btn-sm">ลบ</button>
+                                </td>
                             </tr>
                             {% endfor %}
                             {% endfor %}
@@ -57,7 +60,7 @@
                             <tr>
                                 <th scope="col">รวม</th>
                                 <th scope="col"></th>
-                                <th align=“right” scope="col"><th>62</th></th>
+                                <th>62</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -65,7 +68,6 @@
             </div>
         </div>
     </div>
-
     <div class="fixed-bottom">
         <nav class="navbar navbar-light bg-light" style="margin-bottom: 0%; margin-top: 10px;">
             <form class="container-fluid justify-content-end" style="display: block;">

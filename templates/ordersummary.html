@@ -44,12 +44,12 @@
                                 <th scope="row">x1</th>
                                 <td>
                                 <b>{{ key }}</b> <br>
-                                    {% for option in value %}
+                                    {% for option in value[0] %}
                                     <h12 style="margin-bottom: 0; margin-top: 2px;">*{{ option }}</h12>
                                     {% endfor %}
                                 </td>
                                 <td>
-                                    40<br>
+                                    {{ value[1] }}<br>
                                     <button type="button" class="btn btn-danger btn-sm">ลบ</button>
                                 </td>
                             </tr>

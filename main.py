@@ -12,7 +12,7 @@ DB_HOST = os.getenv('DB_HOST')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_DATABASE = os.getenv('DB_DATABASE')
-print('>>>', DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE)
+#print('>>>', DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE)
 
 app = Flask(__name__)
 connection = mysql.connector.connect(
@@ -61,13 +61,27 @@ def menu_list():
         all_picked_options = []
         for group in options:
             all_picked_options += request.form.getlist(group)
-        #print(all_picked_options)
+        menu_pick = pick
+        total_price = 0
+        sql = "SELECT price FROM prices WHERE name = %s"
+        curs.execute(sql, (menu_pick, ))
+        main_price = curs.fetchall()[0][0]
+        print(main_price)
+        total_price += int(main_price)
+        for option in all_picked_options:
+            sql = "SELECT price FROM prices WHERE name = %s"
+            curs.execute(sql, (option, ))
+            each_price = curs.fetchall()[0][0]
+            print('>>>', each_price)
+            total_price += int(each_price)
+        print(total_price)
+        print(all_picked_options)
         curs.execute('SELECT menus FROM users WHERE id=0')
         yea = curs.fetchall()
         #print('>>>', yea)
         orders = json.loads(yea[0][0].replace("'", '"'))
         #print('>>>', orders)
-        orders += [{pick: all_picked_options}]
+        orders += [{pick: [all_picked_options, total_price]}]
         #print('>>>', orders)
         orders = str(orders)
         sql = "UPDATE users SET menus = %s WHERE id = %s"

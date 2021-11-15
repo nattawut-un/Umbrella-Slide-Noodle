@@ -50,7 +50,9 @@
                                 </td>
                                 <td>
                                     {{ value[1] }}<br>
-                                    <button type="button" class="btn btn-danger btn-sm">ลบ</button>
+                                    <form action="/ordersummary" method='GET'>
+                                        <a type="submit" class="btn btn-danger btn-sm" name='eiei' value='maieiei'>ลบ</a>
+                                    </form>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -60,7 +62,7 @@
                             <tr>
                                 <th scope="col">รวม</th>
                                 <th scope="col"></th>
-                                <th>62</th>
+                                <th>{{ price }}</th>
                             </tr>
                         </tfoot>
                     </table>

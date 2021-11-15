@@ -54,6 +54,7 @@ def home():
 def menu_list():
     curs.execute('SELECT * FROM noodle')
     row = curs.fetchall()
+    all_total_price = 0
     #print(*row, sep='\n')
     if request.method == 'POST':
         curs.execute('SELECT type FROM options')
@@ -76,16 +77,19 @@ def menu_list():
             total_price += int(each_price)
         print(total_price)
         print(all_picked_options)
-        curs.execute('SELECT menus FROM users WHERE id=0')
+        curs.execute('SELECT menus, price FROM users WHERE id=0')
         yea = curs.fetchall()
         #print('>>>', yea)
         orders = json.loads(yea[0][0].replace("'", '"'))
+        price = int(yea[0][1])
         #print('>>>', orders)
-        orders += [{pick: [all_picked_options, total_price]}]
+        orders += [{pick : [all_picked_options, total_price]}]
+        all_total_price += total_price
+        all_total_price += price
         #print('>>>', orders)
         orders = str(orders)
-        sql = "UPDATE users SET menus = %s WHERE id = %s"
-        curs.execute(sql, (orders, 0))
+        sql = "UPDATE users SET menus= %s, price = %s WHERE id = %s"
+        curs.execute(sql, (orders, all_total_price, 0))
         connection.commit()
     return render_template('menu.html', datas=row)
 
@@ -106,9 +110,20 @@ def option_list():
 
 @app.route('/ordersummary', methods=['GET', 'POST'])
 def order_summary():
-    curs.execute('SELECT menus FROM users WHERE id = 0')
-    orders = json.loads(curs.fetchall()[0][0].replace("'", '"'))
-    return render_template('ordersummary.html', datas=orders)
+    curs.execute('SELECT menus, price FROM users WHERE id = 0')
+    user_get = curs.fetchall()
+    print('>>>>>>>>>>>>>>', user_get)
+    orders = json.loads(user_get[0][0].replace("'", '"'))
+    print('>>>>>>>>>>>>>>', orders)
+    price = int(user_get[0][1])
+    print(price)
+    if request.method == 'GET':
+        mai = request.form['eiei']
+        print(mai)
+        #del orders[delete]
+        #price -= list(orders[orders.index[delete]].values())[0][-1]
+        print('**************', orders)
+    return render_template('ordersummary.html', datas=orders, price=price)
 
 @app.route('/complete')
 def complete():

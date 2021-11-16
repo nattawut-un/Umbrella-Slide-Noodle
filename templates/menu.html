@@ -12,25 +12,25 @@
 <body>
     <div class="fixed-top">
         <nav class="navbar navbar-light bg-light">
-            <form class="container-fluid justify-content-start">
+            <div class="container-fluid justify-content-start">
                 <a href="/home" class="btn btn-light" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
                     </svg>
                 </a>
                 <h5 style="margin-bottom: 0;text-align: center;">เมนูอาหาร</h5>
-            </form>
+            </div>
         </nav>
     </div>
     <div class="container" style="padding-top: 54px; padding-bottom: 64px;">
         {% for row in datas %}
         <div class="card" style="margin-top: 10px;">
             <img src={{row.3}} border="0">
-        <form method='POST' action='/option'>
+        <form method='post' action='/options'>
             <div class="card-body">
             <h5 class="card-title">
                 {{row.1}}
-                    <button href="/option" class="btnradio float-end" type='submit' name='pick' value={{row.1}}>
+                    <button href="/options" class="btnradio float-end" type='submit' name='pick' value={{row.1}}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
                             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
                         </svg>
@@ -45,11 +45,13 @@
     </div>
     <div class="fixed-bottom">
         <nav class="navbar navbar-light bg-light" style="margin-bottom: 0%; margin-top: 10px;">
-            <form class="container-fluid justify-content-end" style="display: block;">
+            <div class="container-fluid justify-content-end" style="display: block;">
                 <div class="d-grid gap-2">
-                    <a class="btn btn-primary" type="button" href="/ordersummary">สั่งซื้อ</a>
+                    <form method='post' action='/ordersummary'>
+                        <input class="btn btn-primary" type="submit" value="สั่งซื้อ">
+                    </form>
                 </div>
-            </form>
+            </div>
         </nav>
     </div>
 </body>

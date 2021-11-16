@@ -14,33 +14,33 @@
 <body>
     <div class="fixed-top">
         <nav class="navbar navbar-light bg-light">
-            <form class="container-fluid justify-content-start">
+            <div class="container-fluid justify-content-start">
                 <a href="menu.html" class="btn btn-light" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
                     </svg>
                 </a>
                 <h5 style="margin-bottom: 0;text-align: center;">{{pick}}</h5>
-            </form>
+            </div>
         </nav>
     </div>
-    <form action="/menu" method='POST'>
+    <form method='POST' action='/menus'>
         <div style="padding-top: 64px; padding-bottom: 64px;">
             {% for row in datas %}
             <div class="accordion-item">
                 <h2 class="accordion-header" id="panelsStayOpen-headingOne">
                     <button name='name_option' class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
-                        {{row.1}}
+                        {{row.2}}
                     </button>
                 </h2>
                 <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
                         <ul class="list-group list-group-flush">
-                            {% for i, j in each_option[row.0].items() %}
                             <li class="list-group-item">
-                                <input class="form-check-input me-1" type={{row.3}} name={{row.1}} value={{i}}>
-                                {{i}} {{j}}
+                                {% for i in items[row.2] %}
+                                <input class="form-check-input me-1" type={{row.4}} name={{row.2}} value={{i}}>
+                                {{i}}<br>
+                                {% endfor %}
                             </li>
-                            {% endfor %}
                         </ul>
                 </div>
             </div>
@@ -55,7 +55,7 @@
             <nav class="navbar navbar-light bg-light" style="margin-bottom: 0%; margin-top: 10px;">
                 <div class="container-fluid justify-content-end" style="display: block;">
                     <div class="d-grid gap-2">
-                        <a class="btn btn-primary" type="submit" href="/menu">Add to order</a>
+                        <input class="btn btn-primary" type="submit" value="Add to order">
                     </div>
                 </div>
             </nav>

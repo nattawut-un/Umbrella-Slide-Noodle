@@ -28,7 +28,7 @@
             <div class="col-md-12" align="left">
                 <div class="row">
                     <div class="col p-4 d-flex flex-column position-static">
-                        <strong class="d-inline-block text-primary">โต๊ะที่ 7</strong>
+                        <strong class="d-inline-block text-primary">{{id.0.0}} {{id.0.1}}</strong>
                     <table class="table" style="margin-bottom: 0;">
                         <thead>
                             <tr>
@@ -38,24 +38,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for dict in datas %}
-                            {% for key, value in dict.items() %}
+                            {% for menu, option in datas %}
                             <tr>
-                                <th scope="row">x1</th>
+                                <th scope="row">x{{menu.1}}</th>
                                 <td>
-                                <b>{{ key }}</b> <br>
-                                    {% for option in value[0] %}
-                                    <h12 style="margin-bottom: 0; margin-top: 2px;">*{{ option }}</h12>
-                                    {% endfor %}
+                                <b>{{menu.0}}</b><br>
+                                {% for j in option %}
+                                    <h12 style="margin-bottom: 0; margin-top: 2px;">*{{ j }}</h12>
+                                {% endfor %}
                                 </td>
                                 <td>
-                                    {{ value[1] }}<br>
+                                    {{menu.2}}<br>
                                     <form action="/ordersummary" method='GET'>
                                         <a type="submit" class="btn btn-danger btn-sm" name='eiei' value='maieiei'>ลบ</a>
                                     </form>
                                 </td>
                             </tr>
-                            {% endfor %}
                             {% endfor %}
                         </tbody>
                         <tfoot>

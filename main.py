@@ -12,7 +12,7 @@ DB_HOST = os.getenv('DB_HOST')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_DATABASE = os.getenv('DB_DATABASE')
-#print('>>>', DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE)
+print('>>>', DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE)
 
 app = Flask(__name__)
 connection = mysql.connector.connect(
@@ -22,108 +22,117 @@ connection = mysql.connector.connect(
     password=DB_PASSWORD,
     database=DB_DATABASE
 )
+
 curs = connection.cursor()
+myname = ''
+myid = ''
 pick = ''
 
 @app.route('/')
 def firstpage():
+    '''หน้าแรกของ web ฝั่ง user'''
     return render_template('firstpage.html')
 
 @app.route('/table')
 def table():
+    '''เลือกหมายเลขโต๊ะสำหรับนั่งทานที่ร้าน'''
     return render_template('table.html')
 
 @app.route('/name')
 def name():
+    '''สั่งกลับบ้าน กรอกชื่อ'''
     return render_template('takehome.html')
 
 @app.route('/home', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
-        name = request.form['name']
-        random_id = random.randrange(0, 1000000)
+        global myname
+        global myid
+        myname = request.form['name']
+        myid = random.randrange(0, 1000000)
         print('=====================')
-        print(name, random_id)
+        print(myname, myid)
         print('=====================')
         sql = 'INSERT INTO users (id, name, menus) VALUES (%s, %s, %s)'
-        curs.execute(sql, (random_id, name, '[]'))
+        curs.execute(sql, (myid, myname, '[]'))
         connection.commit()
-    return render_template('home.html', myname=name)
+    return render_template('home.html', myname=myname, myid=myid)
 
-@app.route('/menu', methods=['GET', 'POST'])
-def menu_list():
-    curs.execute('SELECT * FROM noodle')
-    row = curs.fetchall()
-    all_total_price = 0
-    #print(*row, sep='\n')
+@app.route('/menus', methods=['GET', 'POST'])
+def menus():
+    ''' ดึงเมนูมาแสดง '''
+    curs.execute('SELECT * FROM menus')
+    menu = curs.fetchall()
+    curs.execute('SELECT type FROM options')
+    options = [i[0] for i in curs.fetchall()]
+    all_picked_options = []
+    sql = ('SELECT price FROM menus WHERE name = %s')
+    curs.execute(sql, (pick, ))
+    main_price = curs.fetchall()
+    for i in main_price:
+        main_price = i[0]
     if request.method == 'POST':
-        curs.execute('SELECT type FROM options')
-        options = [i[0] for i in curs.fetchall()]
-        all_picked_options = []
         for group in options:
             all_picked_options += request.form.getlist(group)
-        menu_pick = pick
-        total_price = 0
-        sql = "SELECT price FROM prices WHERE name = %s"
-        curs.execute(sql, (menu_pick, ))
-        main_price = curs.fetchall()[0][0]
-        print(main_price)
-        total_price += int(main_price)
-        for option in all_picked_options:
-            sql = "SELECT price FROM prices WHERE name = %s"
-            curs.execute(sql, (option, ))
-            each_price = curs.fetchall()[0][0]
-            print('>>>', each_price)
-            total_price += int(each_price)
-        print(total_price)
-        print(all_picked_options)
-        curs.execute('SELECT menus, price FROM users WHERE id=0')
-        yea = curs.fetchall()
-        #print('>>>', yea)
-        orders = json.loads(yea[0][0].replace("'", '"'))
-        price = int(yea[0][1])
-        #print('>>>', orders)
-        orders += [{pick : [all_picked_options, total_price]}]
-        all_total_price += total_price
-        all_total_price += price
-        #print('>>>', orders)
-        orders = str(orders)
-        sql = "UPDATE users SET menus= %s, price = %s WHERE id = %s"
-        curs.execute(sql, (orders, all_total_price, 0))
+        all_picked_options = str(all_picked_options)
+        print(pick, all_picked_options, myname, myid)
+        sql = 'INSERT INTO orderuser (iduser, tableuser, menu, orderoption, special, num, price) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+        curs.execute(sql, (myid, myname, pick, all_picked_options, '1', '1', main_price))
         connection.commit()
-    return render_template('menu.html', datas=row)
+    return render_template('menu.html', datas=menu)
 
-@app.route('/option', methods=['GET', 'POST'])
-def option_list():
-    curs.execute('SELECT * FROM options')
-    row = curs.fetchall()
-    #print(*row, sep='\n')
-    curs.execute('SELECT adding FROM options')
-    each_option = curs.fetchall()
-    #print(*each_option, sep='\n')
-    each_option = [json.loads(item[0]) for item in each_option]
-    print(each_option)
+@app.route('/options', methods=['GET', 'POST'])
+def options():
+    ''' option ของแต่ละเมนู '''
     if request.method == 'POST':
         global pick
         pick = request.form['pick']
-    return render_template('noodle.html', pick=pick, datas=row, each_option=each_option)
+        sql = 'SELECT price FROM menus WHERE name = %s'
+        curs.execute(sql, (pick, ))
+        main_price = curs.fetchall()[0][0]
+        if 'ก๋วยเตี๋ยว' in pick:
+            curs.execute('SELECT * FROM options')
+        if 'เกาเหลา' in pick:
+            curs.execute('SELECT * FROM options WHERE name = "เกาเหลา"')
+        option_menu = curs.fetchall()
+        items = {}
+        for i in option_menu:
+            yea = json.loads(i[3].replace("'", '"'))
+            items[i[2]] = yea
+    return render_template('option.html', datas=option_menu, items=items, pick=pick)
 
 @app.route('/ordersummary', methods=['GET', 'POST'])
 def order_summary():
-    curs.execute('SELECT menus, price FROM users WHERE id = 0')
+    ''' รายการอาหารที่ลูกค้าสั่ง '''
+    sql = 'SELECT iduser, tableuser FROM orderuser WHERE iduser = %s'
+    curs.execute(sql, (myid, ))
+    id_table = curs.fetchall()
+    print(id_table)
+
+    sql = 'SELECT menu, num, price FROM orderuser WHERE iduser = %s'
+    curs.execute(sql, (myid, ))
     user_get = curs.fetchall()
-    print('>>>>>>>>>>>>>>', user_get)
-    orders = json.loads(user_get[0][0].replace("'", '"'))
-    print('>>>>>>>>>>>>>>', orders)
-    price = int(user_get[0][1])
-    print(price)
-    if request.method == 'GET':
-        mai = request.form['eiei']
-        print(mai)
-        #del orders[delete]
-        #price -= list(orders[orders.index[delete]].values())[0][-1]
-        print('**************', orders)
-    return render_template('ordersummary.html', datas=orders, price=price)
+    print(user_get)
+
+    sql = 'SELECT price FROM orderuser WHERE iduser = %s'
+    curs.execute(sql, (myid, ))
+    price = curs.fetchall()
+    cost = 0
+    for i in price:
+        cost += float(i[0])
+    print('ราคาาาาาาาาาาาาาาาาาา', price, cost)
+
+    optionuser = 'SELECT orderoption FROM orderuser WHERE iduser = %s'
+    curs.execute(optionuser, (myid, ))
+    get_option = curs.fetchall()
+    print(get_option)
+    options = []
+    for item in get_option:
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', item)
+        options += [json.loads(item[0].replace("'", '"'))]
+    print(options)
+    datas = zip(user_get, options)
+    return render_template('ordersummary.html', id=id_table, datas=datas, price=cost)
 
 @app.route('/complete')
 def complete():

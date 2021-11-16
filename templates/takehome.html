@@ -24,7 +24,7 @@
             <h3>กรุณากรอกชื่อ</h3>
         <br>
         </div>
-        <form method='post' action='{{ url_for('home') }}'>
+        <form method='post' action={{ url_for('.home') }}>
         <div class="input-group mb-3">
           <input type="text" class="form-control" placeholder="ชื่อของคุณ" aria-label="Recipient's username" name='name'>
         </div>

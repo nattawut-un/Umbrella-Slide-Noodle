@@ -8,19 +8,19 @@ import os
 
 load_dotenv()
 
-DB_HOST = os.getenv('DB_HOST')
-DB_USER = os.getenv('DB_USER')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_DATABASE = os.getenv('DB_DATABASE')
-print('>>>', DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE)
+# DB_HOST = os.getenv('DB_HOST')
+# DB_USER = os.getenv('DB_USER')
+# DB_PASSWORD = os.getenv('DB_PASSWORD')
+# DB_DATABASE = os.getenv('DB_DATABASE')
+# print('>>>', DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE)
 
 app = Flask(__name__)
 connection = mysql.connector.connect(
-    host=DB_HOST,
+    host='remotemysql.com',
     port=3306,
-    user=DB_USER,
-    password=DB_PASSWORD,
-    database=DB_DATABASE
+    user='aEr8n5OTYm',
+    password='mRmAuNst5H',
+    database='aEr8n5OTYm'
 )
 
 curs = connection.cursor()
@@ -36,7 +36,8 @@ def firstpage():
 @app.route('/table')
 def table():
     '''เลือกหมายเลขโต๊ะสำหรับนั่งทานที่ร้าน'''
-    return render_template('table.html')
+    num_table = [i for i in range(1, 11)]
+    return render_template('table.html', datas=num_table)
 
 @app.route('/name')
 def name():
@@ -48,7 +49,10 @@ def home():
     if request.method == 'POST':
         global myname
         global myid
-        myname = request.form['name']
+        try:
+            myname = request.form['name']
+        except:
+            myname = request.form['table']
         myid = random.randrange(0, 1000000)
         print('=====================')
         print(myname, myid)
@@ -73,11 +77,16 @@ def menus():
         main_price = i[0]
     if request.method == 'POST':
         for group in options:
-            all_picked_options += request.form.getlist(group)
+            item = request.form.getlist(group)
+            all_picked_options += item
+            if item == ['พิเศษ']:
+                main_price += 10
         all_picked_options = str(all_picked_options)
+        num = request.form['num']
+        main_price *= int(num)
         print(pick, all_picked_options, myname, myid)
-        sql = 'INSERT INTO orderuser (iduser, tableuser, menu, orderoption, special, num, price) VALUES (%s, %s, %s, %s, %s, %s, %s)'
-        curs.execute(sql, (myid, myname, pick, all_picked_options, '1', '1', main_price))
+        sql = 'INSERT INTO orderuser (iduser, tableuser, menu, orderoption, num, price) VALUES (%s, %s, %s, %s, %s, %s)'
+        curs.execute(sql, (myid, myname, pick, all_picked_options, num, main_price))
         connection.commit()
     return render_template('menu.html', datas=menu)
 
@@ -99,7 +108,8 @@ def options():
         for i in option_menu:
             yea = json.loads(i[3].replace("'", '"'))
             items[i[2]] = yea
-    return render_template('option.html', datas=option_menu, items=items, pick=pick)
+        num = [i for i in range(1,11)]
+    return render_template('option.html', datas=option_menu, items=items, pick=pick, num=num)
 
 @app.route('/ordersummary', methods=['GET', 'POST'])
 def order_summary():
@@ -134,9 +144,17 @@ def order_summary():
     datas = zip(user_get, options)
     return render_template('ordersummary.html', id=id_table, datas=datas, price=cost)
 
-@app.route('/complete')
+@app.route('/complete', methods=['GET', 'POST'])
 def complete():
-    return render_template('complete.html')
+    print(request)
+    if request.method == 'POST':
+        sql = 'INSERT INTO queue_user (iduser, tableuser) VALUES (%s, %s)'
+        curs.execute(sql, (myid, myname))
+        connection.commit()
+        sql = 'SELECT id FROM queue_user WHERE iduser = %s'
+        curs.execute(sql, (myid, ))
+        queue = curs.fetchall()
+    return render_template('complete.html', queue=queue[0][0])
 
 if __name__ == '__main__':
     app.run(debug=True)

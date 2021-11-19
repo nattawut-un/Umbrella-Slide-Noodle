@@ -28,16 +28,22 @@
             <img src={{row.3}} border="0">
         <form method='post' action='/options'>
             <div class="card-body">
-            <h5 class="card-title">
-                {{row.1}}
-                    <button href="/options" class="btnradio float-end" type='submit' name='pick' value={{row.1}}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
-                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
-                        </svg>
-                    </button>
+            <h5 class="card-title" style="text-align: left;">
+                <div class="row">
+                    <div class="col-10">
+                        {{row.1}}
+                    </div>
+                    <div class="col-2">
+                        <button class="btn btn-light" type='submit' name='pick' value={{row.1}}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
                 </h5>
             </h5>
-            <p class="card-text">{{row.2}}</p>
+            <p class="card-text" style="text-align: left;">{{row.2}}</p>
             </div>
         </form>
         </div>
@@ -48,7 +54,7 @@
             <div class="container-fluid justify-content-end" style="display: block;">
                 <div class="d-grid gap-2">
                     <form method='post' action='/ordersummary'>
-                        <input class="btn btn-primary" type="submit" value="สั่งซื้อ">
+                        <input class="btn btn-primary" style="width: 100%;" type="submit" value="สั่งซื้อ">
                     </form>
                 </div>
             </div>

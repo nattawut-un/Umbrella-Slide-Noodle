@@ -49,9 +49,7 @@
                                 </td>
                                 <td>
                                     {{menu.2}}<br>
-                                    <form action="/ordersummary" method='GET'>
-                                        <a type="submit" class="btn btn-danger btn-sm" name='eiei' value='maieiei'>ลบ</a>
-                                    </form>
+                                    <a type="submit" class="btn btn-danger btn-sm" name='eiei' value='maieiei'>ลบ</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -70,11 +68,13 @@
     </div>
     <div class="fixed-bottom">
         <nav class="navbar navbar-light bg-light" style="margin-bottom: 0%; margin-top: 10px;">
-            <form class="container-fluid justify-content-end" style="display: block;">
+            <div class="container-fluid justify-content-end" style="display: block;">
                 <div class="d-grid gap-2">
-                    <a class="btn btn-primary" type="button" href="/complete">ยืนยัน</a>
+                    <form action="/complete" method="POST">
+                        <input class="btn btn-primary" style="width: 100%;" type="submit" value="ยืนยัน">
+                    </form>
                 </div>
-            </form>
+            </div>
         </nav>
     </div>
 </body>

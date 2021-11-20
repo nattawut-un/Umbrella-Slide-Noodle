@@ -14,17 +14,18 @@
 <body>
     <div class="fixed-top">
         <nav class="navbar navbar-light bg-light">
-            <form class="container-fluid justify-content-start">
+            <div class="container-fluid justify-content-start">
                 <a href="/menu" class="btn btn-light" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
                     </svg>
                 </a>
                 <h5 style="margin-bottom: 0;text-align: center;">ยืนยันข้อมูล</h5>
-            </form>
+            </div>
         </nav>
     </div>
     <div class="container" style="padding-top: 45px; padding-bottom: 30px;">
+        <form action="/ordersummary" method="post">
             <div class="col-md-12" align="left">
                 <div class="row">
                     <div class="col p-4 d-flex flex-column position-static">
@@ -40,16 +41,16 @@
                         <tbody>
                             {% for menu, option in datas %}
                             <tr>
-                                <th scope="row">x{{menu.1}}</th>
+                                <th scope="row" name='num' value={{menu.1}}>x{{menu.1}}</th>
                                 <td>
-                                <b>{{menu.0}}</b><br>
+                                <b name='menu' value={{menu.0}}>{{menu.0}}</b><br>
                                 {% for j in option %}
                                     <h12 style="margin-bottom: 0; margin-top: 2px;">*{{ j }}</h12>
                                 {% endfor %}
                                 </td>
-                                <td>
+                                <td name='price' value={{menu.2}}>
                                     {{menu.2}}<br>
-                                    <a type="submit" class="btn btn-danger btn-sm" name='eiei' value='maieiei'>ลบ</a>
+                                    <button type="submit" class="btn btn-danger btn-sm" name='delete' value=''>ลบ</button>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -62,17 +63,16 @@
                             </tr>
                         </tfoot>
                     </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
     <div class="fixed-bottom">
         <nav class="navbar navbar-light bg-light" style="margin-bottom: 0%; margin-top: 10px;">
             <div class="container-fluid justify-content-end" style="display: block;">
                 <div class="d-grid gap-2">
-                    <form action="/complete" method="POST">
-                        <input class="btn btn-primary" style="width: 100%;" type="submit" value="ยืนยัน">
-                    </form>
+                    <a href="/complete" class="btn btn-primary" style="width: 100%;" type="submit">ยืนยัน</a>
                 </div>
             </div>
         </nav>

@@ -1,5 +1,6 @@
 """ก๋วยเตี๋ยวร่มลื่น"""
 from flask import Flask, render_template, request, redirect, url_for
+from flask.scaffold import F
 import mysql.connector
 import json
 import random
@@ -114,6 +115,13 @@ def options():
 @app.route('/ordersummary', methods=['GET', 'POST'])
 def order_summary():
     ''' รายการอาหารที่ลูกค้าสั่ง '''
+    if request.method == 'POST':
+        lob = request.form['delete']
+        print(list(lob), type(lob))
+        #menu_del = request.form['menu']
+        #option_del = request.form['option']
+        #num_del = request.form['num']
+        #print('ก็มาเถอะนะ' ,myid, myname, menu_del, option_del, num_del)
     sql = 'SELECT iduser, tableuser FROM orderuser WHERE iduser = %s'
     curs.execute(sql, (myid, ))
     id_table = curs.fetchall()

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>สรุปรายการอาหาร | ก๋วยเตี๋ยวร่มลื่น⛱️🍜</title>
+    <link rel='icon' href='https://cdn.discordapp.com/attachments/894827053046718474/912345147587563571/noodles.png'>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/styles.css') }}">
     <link rel="stylesheet" type="text/css" href="styles.css">
@@ -15,7 +16,7 @@
     <div class="fixed-top">
         <nav class="navbar navbar-light bg-light">
             <div class="container-fluid justify-content-start">
-                <a href="/menu" class="btn btn-light" type="button">
+                <a href="/menus" class="btn btn-light" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
                     </svg>
@@ -25,11 +26,15 @@
         </nav>
     </div>
     <div class="container" style="padding-top: 45px; padding-bottom: 30px;">
-        <form action="/ordersummary" method="post">
+        <form method="post">
             <div class="col-md-12" align="left">
                 <div class="row">
                     <div class="col p-4 d-flex flex-column position-static">
-                        <strong class="d-inline-block text-primary">{{id.0.0}} {{id.0.1}}</strong>
+                        {% if id %}
+                            <strong class="d-inline-block text-primary">{{id.0.0}} {{id.0.1}}</strong>
+                        {% else %}
+                            <strong class="d-inline-block text-primary">คุณยังไม่สั่งอาหารใดๆ</strong>
+                        {% endif %}
                     <table class="table" style="margin-bottom: 0;">
                         <thead>
                             <tr>
@@ -39,21 +44,23 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for menu, option in datas %}
-                            <tr>
-                                <th scope="row" name='num' value={{menu.1}}>x{{menu.1}}</th>
-                                <td>
-                                <b name='menu' value={{menu.0}}>{{menu.0}}</b><br>
-                                {% for j in option %}
-                                    <h12 style="margin-bottom: 0; margin-top: 2px;">*{{ j }}</h12>
+                            {% if datas %}
+                                {% for menu, option, id in datas %}
+                                <tr>
+                                    <th scope="row" name='num' value={{menu.1}}>x{{menu.1}}</th>
+                                    <td>
+                                    <b name='menu' value={{menu.0}}>{{menu.0}}</b><br>
+                                    {% for j in option %}
+                                        <h12 style="margin-bottom: 0; margin-top: 2px;">*{{ j }}</h12>
+                                    {% endfor %}
+                                    </td>
+                                    <td name='price' value={{menu.2}}>
+                                        {{menu.2}}<br>
+                                        <button type="submit" class="btn btn-danger btn-sm" name='delete' value={{id}} onClick='window.location.reload()'>ลบ</button>
+                                    </td>
+                                </tr>
                                 {% endfor %}
-                                </td>
-                                <td name='price' value={{menu.2}}>
-                                    {{menu.2}}<br>
-                                    <button type="submit" class="btn btn-danger btn-sm" name='delete' value=''>ลบ</button>
-                                </td>
-                            </tr>
-                            {% endfor %}
+                            {% endif %}
                         </tbody>
                         <tfoot>
                             <tr>
@@ -66,6 +73,7 @@
                     </div>
                 </div>
             </div>
+            <button type="submit" class="btn btn-danger btn-sm" style='position: absolute; right: 10%;' name='delete' value='all' onClick='window.location.reload()'><b>ลบทั้งหมด</b></button>
         </form>
     </div>
     <div class="fixed-bottom">

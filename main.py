@@ -6,6 +6,7 @@ import json
 import random
 from dotenv import load_dotenv
 import os
+from datetime import datetime
 
 load_dotenv()
 
@@ -48,8 +49,7 @@ def name():
 @app.route('/home', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
-        global myname
-        global myid
+        global myname, myid
         try:
             myname = request.form['name']
         except:
@@ -166,8 +166,13 @@ def order_summary():
 
 @app.route('/complete', methods=['GET', 'POST'])
 def complete():
-    sql = 'INSERT INTO queue_user (iduser, tableuser) VALUES (%s, %s)'
-    curs.execute(sql, (myid, myname))
+    '''คิว'''
+    sql = 'SELECT price FROM orderuser WHERE iduser = %s'
+    curs.execute(sql, (myid, ))
+    price = curs.fetchall()
+    cost = sum(float(i[0]) for i in price)
+    sql = 'INSERT INTO queue_user (iduser, tableuser, totalprice, ordertime) VALUES (%s, %s, %s, %s)'
+    curs.execute(sql, (myid, myname, cost, str(datetime.now())))
     connection.commit()
     curs.execute('SELECT COUNT(*) FROM queue_user')
     queue = curs.fetchall()
@@ -176,10 +181,33 @@ def complete():
 
 @app.route('/admin_menu', methods=['GET', 'POST'])
 def admin_menu():
+    '''หน้าเว็บฝั่งแม่ค้า'''
+    if request.method == 'POST':
+        # try:
+        iduser = request.form
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', iduser)
+        iduser_id = dict(iduser)
+        iduser_id = next(iter((iduser_id.items())) )
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', iduser_id)
+        if iduser_id[0] == 'cooking':
+            sql = "UPDATE queue_user SET status = '1' WHERE iduser = %s"
+            curs.execute(sql, (iduser_id[1], ))
+            connection.commit()
+        elif iduser_id[0] == 'complete':
+            sql = "SELECT iduser, tableuser, totalprice FROM queue_user WHERE iduser = %s"
+            curs.execute(sql, (iduser_id[1], ))
+            user_data = curs.fetchall()
+            for data in user_data:
+                user_data = data
+            print('user_data >>>>>>>>>>>>>>>>>>>>>>>>', user_data)
+            sql = "INSERT INTO complete_user (iduser, tableuser, totalprice) VALUES (%s, %s, %s)"
+            curs.execute(sql, user_data)
+            sql = "DELETE FROM queue_user WHERE iduser = %s"
+            curs.execute(sql, (iduser_id[1], ))
+            connection.commit()
     curs.execute('SELECT * FROM queue_user')
     order_admin = curs.fetchall()
     order_list = []
-    order_option = []
     for item in order_admin:
         sql = 'SELECT * FROM orderuser WHERE (iduser, tableuser) = (%s, %s)'
         curs.execute(sql, (item[1], item[2]))
@@ -196,6 +224,34 @@ def admin_menu():
     print(*order_list, sep='\n')
     print('**********************************************************************************')
     return render_template('admin_menu.html', datas=order_list)
+
+@app.route('/yourorder', methods=['GET', 'POST'])
+def yourorder():
+    '''รายการอาหารของลูกค้า'''
+    sql = 'SELECT * FROM queue_user WHERE tableuser = %s'
+    curs.execute(sql, (myname, ))
+    order_admin = curs.fetchall()
+    if order_admin == '':
+        sql = 'SELECT * FROM complete_user WHERE tableuser = %s'
+        curs.execute(sql, (myname, ))
+        order_admin = curs.fetchall()
+    order_list = []
+    for item in order_admin:
+        sql = 'SELECT * FROM orderuser WHERE (iduser, tableuser) = (%s, %s)'
+        curs.execute(sql, (item[1], item[2]))
+        orderr = curs.fetchall()
+        print(item[0], end='\n')
+        # for item_menu in orderr:
+        #     print(item_menu)
+        # print('----------------------------------------------------------------------')
+        orderr = [list(i) for i in orderr]
+        for menu in orderr:
+            menu[4] = json.loads(menu[4].replace("'", '"'))
+        order_list += [orderr]
+    print('*************** order_list *******************************************************')
+    print(*order_list, sep='\n')
+    print('**********************************************************************************')
+    return render_template('yourorder.html', datas=order_list)
 
 @app.route('/money')
 def money():

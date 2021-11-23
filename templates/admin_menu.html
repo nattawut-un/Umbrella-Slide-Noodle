@@ -10,19 +10,20 @@
 </head>
 <body>
     <div class="fixed-top">
-        <nav class="navbar navbar-light bg-light">
-            <form class="container-fluid justify-content-start">
-                <a href="/admin_home" class="btn btn-light" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-                    </svg>
-                </a>
-                <h5 style="margin-bottom: 0;text-align: center;">เมนูอาหาร</h5>
-            </form>
-        </nav>
+      <nav class="navbar navbar-light bg-light">
+        <form class="container-fluid justify-content-start">
+          <a href="/admin_home" class="btn btn-light" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+            </svg>
+          </a>
+          <h5 style="margin-bottom: 0;text-align: center;">เมนูอาหาร</h5>
+        </form>
+      </nav>
     </div>
     <div class="container" style="padding-top: 64px; padding-bottom: 64px;">
         {% for table in datas %}
+        <form method="post" action="" id={{table.0.1}}>
         <div class="accordion" id="accordionPanelsStayOpenExample">
           <div class="accordion-item">
             <h2 class="accordion-header" id="panelsStayOpen-headingOne">
@@ -34,12 +35,8 @@
               <div class="accordion-body">
                 <div class="col-md-12">
                   <div class="col d-flex flex-column position-static">
-                    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                      <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
-                      <label class="btn btn-outline-primary" for="btnradio1">กำลังปรุง</label>
-                      <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
-                      <label class="btn btn-outline-primary" for="btnradio2">เสร็จสิ้น</label>
-                    </div>
+                      <button class="btn btn-outline-primary" type="submit" name="cooking" value={{table.0.1}} form={{table.0.1}}>กำลังปรุง</button>
+                      <button class="btn btn-outline-primary" type="submit" name="complete" value={{table.0.1}} form={{table.0.1}}>เสร็จสิ้น</button>
                     <table class="table" style="margin-bottom: 0;">
                         <thead>
                             <tr>
@@ -78,6 +75,7 @@
             </div>
           </div>
         </div>
+        </form>
         {% endfor %}
     </div>
 </body>

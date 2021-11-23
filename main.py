@@ -29,6 +29,7 @@ curs = connection.cursor()
 myname = ''
 myid = ''
 pick = ''
+order_id = ''
 
 @app.route('/')
 def firstpage():
@@ -76,6 +77,10 @@ def menus():
     main_price = curs.fetchall()
     for i in main_price:
         main_price = i[0]
+    if request.method == 'GET':
+        global order_id
+        order_id = random.randrange(0, 1000000)
+        print(order_id)
     if request.method == 'POST':
         for group in options:
             item = request.form.getlist(group)
@@ -86,8 +91,8 @@ def menus():
         num = request.form['num']
         main_price *= int(num)
         print(pick, all_picked_options, myname, myid)
-        sql = 'INSERT INTO orderuser (iduser, tableuser, menu, orderoption, num, price) VALUES (%s, %s, %s, %s, %s, %s)'
-        curs.execute(sql, (myid, myname, pick, all_picked_options, num, main_price))
+        sql = 'INSERT INTO orderuser (iduser, tableuser, menu, orderoption, num, price, orderid) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+        curs.execute(sql, (myid, myname, pick, all_picked_options, num, main_price, order_id))
         connection.commit()
     return render_template('menu.html', datas=menu)
 
@@ -121,37 +126,37 @@ def order_summary():
         lob = request.form['delete']
         print('LOB >>>>>>>>>>>>>>', lob, list(lob), type(lob))
         if lob == 'all':
-            sql = 'DELETE FROM orderuser WHERE iduser = %s'
-            vals = (myid, )
+            sql = 'DELETE FROM orderuser WHERE orderid = %s'
+            vals = (order_id, )
         else:
-            sql = 'DELETE FROM orderuser WHERE (id, iduser) = (%s, %s)'
-            vals = (lob, myid, )
+            sql = 'DELETE FROM orderuser WHERE (id, iduser, orderid) = (%s, %s, %s)'
+            vals = (lob, myid, order_id, )
         curs.execute(sql, vals)
         connection.commit()
-    sql = 'SELECT iduser, tableuser FROM orderuser WHERE iduser = %s'
-    curs.execute(sql, (myid, ))
+    sql = 'SELECT iduser, tableuser FROM orderuser WHERE orderid = %s'
+    curs.execute(sql, (order_id, ))
     id_table = curs.fetchall()
     print('id_table >>>>>>>>>>', id_table)
 
-    sql = 'SELECT menu, num, price FROM orderuser WHERE iduser = %s'
-    curs.execute(sql, (myid, ))
+    sql = 'SELECT menu, num, price FROM orderuser WHERE orderid = %s'
+    curs.execute(sql, (order_id, ))
     user_get = curs.fetchall()
     print('user_get >>>>>>>>>>', user_get)
 
-    sql = 'SELECT price FROM orderuser WHERE iduser = %s'
-    curs.execute(sql, (myid, ))
+    sql = 'SELECT price FROM orderuser WHERE orderid = %s'
+    curs.execute(sql, (order_id, ))
     price = curs.fetchall()
     cost = sum(float(i[0]) for i in price)
     print('ราคาาาาาาาาาาาาาาาาาาา', price, cost)
 
-    sql = 'SELECT id FROM orderuser WHERE iduser = %s'
-    curs.execute(sql, (myid, ))
+    sql = 'SELECT id FROM orderuser WHERE orderid = %s'
+    curs.execute(sql, (order_id, ))
     menu_id = curs.fetchall()
     menu_id = [i[0] for i in menu_id]
     print('menu_id >>>>>>>>>>>>', menu_id)
 
-    optionuser = 'SELECT orderoption FROM orderuser WHERE iduser = %s'
-    curs.execute(optionuser, (myid, ))
+    optionuser = 'SELECT orderoption FROM orderuser WHERE orderid = %s'
+    curs.execute(optionuser, (order_id, ))
     get_option = curs.fetchall()
     print(get_option)
     options = []
@@ -171,8 +176,8 @@ def complete():
     curs.execute(sql, (myid, ))
     price = curs.fetchall()
     cost = sum(float(i[0]) for i in price)
-    sql = 'INSERT INTO queue_user (iduser, tableuser, totalprice, ordertime) VALUES (%s, %s, %s, %s)'
-    curs.execute(sql, (myid, myname, cost, str(datetime.now())))
+    sql = 'INSERT INTO queue_user (iduser, tableuser, totalprice, ordertime, orderid) VALUES (%s, %s, %s, %s, %s)'
+    curs.execute(sql, (myid, myname, cost, str(datetime.now()), order_id))
     connection.commit()
     curs.execute('SELECT COUNT(*) FROM queue_user')
     queue = curs.fetchall()
@@ -228,17 +233,18 @@ def admin_menu():
 @app.route('/yourorder', methods=['GET', 'POST'])
 def yourorder():
     '''รายการอาหารของลูกค้า'''
-    sql = 'SELECT * FROM queue_user WHERE tableuser = %s'
-    curs.execute(sql, (myname, ))
+    sql = 'SELECT * FROM queue_user WHERE iduser = %s'
+    curs.execute(sql, (myid, ))
     order_admin = curs.fetchall()
     if order_admin == '':
-        sql = 'SELECT * FROM complete_user WHERE tableuser = %s'
-        curs.execute(sql, (myname, ))
+        sql = 'SELECT * FROM complete_user WHERE iduser = %s'
+        curs.execute(sql, (myid, ))
         order_admin = curs.fetchall()
     order_list = []
     for item in order_admin:
-        sql = 'SELECT * FROM orderuser WHERE (iduser, tableuser) = (%s, %s)'
-        curs.execute(sql, (item[1], item[2]))
+        print(item)
+        sql = 'SELECT * FROM orderuser WHERE (iduser, tableuser, orderid) = (%s, %s, %s)'
+        curs.execute(sql, (item[1], item[2], item[6]))
         orderr = curs.fetchall()
         print(item[0], end='\n')
         # for item_menu in orderr:

@@ -21,11 +21,10 @@
         </form>
       </nav>
     </div>
-    <div class="container" style="padding-top: 64px; padding-bottom: 64px;">
+    <div style="padding-top: 64px; padding-bottom: 64px; padding-left: 20px; padding-right: 20px;">
         {% for table in datas %}
-        <div class="accordion" id="accordionPanelsStayOpenExample">
           <div class="accordion-item">
-            <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+            <h2 class="accordion-header">
               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
                 <strong class="d-inline-block text-primary">{{table.0.1}} {{table.0.2}}</strong>
               </button>
@@ -70,8 +69,6 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
         {% endfor %}
     </div>
 </body>

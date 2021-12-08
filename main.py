@@ -193,29 +193,29 @@ def admin_menu():
         print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', iduser)
         iduser_id = dict(iduser)
         iduser_id = next(iter((iduser_id.items())) )
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', iduser_id)
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ไหมอยากเห็นนนนนนนนนนน', iduser_id)
         if iduser_id[0] == 'cooking':
             sql = "UPDATE queue_user SET status = '1' WHERE iduser = %s"
             curs.execute(sql, (iduser_id[1], ))
             connection.commit()
         elif iduser_id[0] == 'complete':
-            sql = "SELECT iduser, tableuser, totalprice FROM queue_user WHERE iduser = %s"
+            sql = "SELECT iduser, tableuser, totalprice, orderid FROM queue_user WHERE iduser = %s"
             curs.execute(sql, (iduser_id[1], ))
             user_data = curs.fetchall()
             for data in user_data:
                 user_data = data
             print('user_data >>>>>>>>>>>>>>>>>>>>>>>>', user_data)
-            sql = "INSERT INTO complete_user (iduser, tableuser, totalprice) VALUES (%s, %s, %s)"
+            sql = "INSERT INTO complete_user (iduser, tableuser, totalprice, orderid) VALUES (%s, %s, %s, %s)"
             curs.execute(sql, user_data)
-            sql = "DELETE FROM queue_user WHERE iduser = %s"
+            sql = "DELETE FROM queue_user WHERE orderid = %s"
             curs.execute(sql, (iduser_id[1], ))
             connection.commit()
     curs.execute('SELECT * FROM queue_user')
     order_admin = curs.fetchall()
     order_list = []
     for item in order_admin:
-        sql = 'SELECT * FROM orderuser WHERE (iduser, tableuser) = (%s, %s)'
-        curs.execute(sql, (item[1], item[2]))
+        sql = 'SELECT * FROM orderuser WHERE (iduser, tableuser, orderid) = (%s, %s, %s)'
+        curs.execute(sql, (item[1], item[2], item[6]))
         orderr = curs.fetchall()
         print(item[0], end='\n')
         # for item_menu in orderr:
@@ -226,7 +226,8 @@ def admin_menu():
             menu[4] = json.loads(menu[4].replace("'", '"'))
         order_list += [orderr]
     print('*************** order_list *******************************************************')
-    print(*order_list, sep='\n')
+    for stuff in order_list:
+        print('=====>', stuff)
     print('**********************************************************************************')
     return render_template('admin_menu.html', datas=order_list)
 
@@ -295,11 +296,51 @@ def admin_home():
 
 @app.route('/admin_account', methods=['GET', 'POST'])
 def admin_account():
-    return render_template('admin_account.html')
+    curs.execute('SELECT totalprice FROM complete_user')
+    money = curs.fetchall()
+    money = [int(i[0]) for i in money]
+    return render_template('admin_account.html', money=sum(money))
 
 @app.route('/admin_menu_success', methods=['GET', 'POST'])
 def admin_menu_success():
-    return render_template('admin_menu_success.html')
+    if request.method == 'POST':
+        # try:
+        iduser = request.form
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', iduser)
+        iduser_id = dict(iduser)
+        iduser_id = next(iter((iduser_id.items())) )
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', iduser_id)
+        sql = "SELECT iduser, tableuser, totalprice FROM complete_user WHERE iduser = %s"
+        curs.execute(sql, (iduser_id[1], ))
+        user_data = curs.fetchall()
+        for data in user_data:
+            user_data = data
+        print('user_data >>>>>>>>>>>>>>>>>>>>>>>>', user_data)
+        sql = "INSERT INTO paid_user (iduser, tableuser, totalprice) VALUES (%s, %s, %s)"
+        curs.execute(sql, user_data)
+        sql = "DELETE FROM complete_user WHERE iduser = %s"
+        curs.execute(sql, (iduser_id[1], ))
+        connection.commit()
+    curs.execute('SELECT * FROM complete_user')
+    order_admin = curs.fetchall()
+    order_list = []
+    for item in order_admin:
+        sql = 'SELECT * FROM orderuser WHERE (iduser, tableuser, orderid) = (%s, %s, %s)'
+        curs.execute(sql, (item[1], item[2], item[4]))
+        orderr = curs.fetchall()
+        print(item[0], end='\n')
+        # for item_menu in orderr:
+        #     print(item_menu)
+        # print('----------------------------------------------------------------------')
+        orderr = [list(i) for i in orderr]
+        for menu in orderr:
+            menu[4] = json.loads(menu[4].replace("'", '"'))
+        order_list += [orderr]
+    print('*************** order_list *******************************************************')
+    for stuff in order_list:
+        print('=====>', stuff)
+    print('**********************************************************************************')
+    return render_template('admin_menu_success.html', datas=order_list)
 
 if __name__ == '__main__':
     app.run(debug=True)

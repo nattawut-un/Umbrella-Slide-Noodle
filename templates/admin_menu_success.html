@@ -10,34 +10,32 @@
 </head>
 <body>
     <div class="fixed-top">
-        <nav class="navbar navbar-light bg-light">
-            <form class="container-fluid justify-content-start">
-                <a href="/admin_home" class="btn btn-light" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-                    </svg>
-                </a>
-                <h5 style="margin-bottom: 0;text-align: center;">เมนูอาหาร</h5>
-            </form>
-        </nav>
+      <nav class="navbar navbar-light bg-light">
+        <form class="container-fluid justify-content-start">
+          <a href="/admin_home" class="btn btn-light" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+            </svg>
+          </a>
+          <h5 style="margin-bottom: 0;text-align: center;">เมนูอาหาร</h5>
+        </form>
+      </nav>
     </div>
     <div class="container" style="padding-top: 64px; padding-bottom: 64px;">
-        {% for i in datas %}
+        {% for table in datas %}
+        <form method="post" action="" id={{table.0.1}}>
         <div class="accordion" id="accordionPanelsStayOpenExample">
           <div class="accordion-item">
             <h2 class="accordion-header" id="panelsStayOpen-headingOne">
               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
-                <strong class="d-inline-block text-primary">โต๊ะที่ 7</strong>
+                <strong class="d-inline-block text-primary">{{table.0.1}} {{table.0.2}}</strong>
               </button>
             </h2>
             <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
               <div class="accordion-body">
                 <div class="col-md-12">
                   <div class="col d-flex flex-column position-static">
-                    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                      <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
-                      <label class="btn btn-outline-primary" for="btnradio1">เก็บเงิน</label>
-                    </div>
+                      <button class="btn btn-outline-primary" type="submit" name="cooking" value={{table.0.1}} form={{table.0.1}}>เก็บเงิน</button>
                     <table class="table" style="margin-bottom: 0;">
                         <thead>
                             <tr>
@@ -47,21 +45,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for dict in datas %}
-                            {% for key, value in dict.items() %}
+                            {% for menu in table %}
                             <tr>
-                                <th scope="row">x1</th>
+                                <th scope="row">{{ menu.5 }}</th>
                                 <td>
-                                <b>{{ key }}</b> <br>
-                                    {% for option in value %}
+                                <b>{{ menu.3 }}</b> <br>
+                                    {% for option in menu.4 %}
                                     <h12 style="margin-bottom: 0; margin-top: 2px;">*{{ option }}</h12>
                                     {% endfor %}
                                 </td>
                                 <td>
-                                    40<br>
+                                    {{ menu.6 }}<br>
                                 </td>
                             </tr>
-                            {% endfor %}
                             {% endfor %}
                         </tbody>
                         <tfoot>
@@ -73,11 +69,12 @@
                         </tfoot>
                     </table>
                   </div>
-              ` </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        </form>
         {% endfor %}
     </div>
 </body>

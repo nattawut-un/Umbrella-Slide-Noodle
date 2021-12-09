@@ -6,7 +6,7 @@ import json
 import random
 from dotenv import load_dotenv
 import os
-from datetime import datetime
+from datetime import datetime, date
 
 load_dotenv()
 
@@ -14,8 +14,7 @@ DB_HOST = os.getenv('DB_HOST')
 DB_USER = os.getenv('DB_USER')
 DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_DATABASE = os.getenv('DB_DATABASE')
-# print('>>>', DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE)
-
+print('>>>', DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE)
 app = Flask(__name__)
 connection = mysql.connector.connect(
     host=DB_HOST,
@@ -189,18 +188,18 @@ def admin_menu():
     '''หน้าเว็บฝั่งแม่ค้า'''
     if request.method == 'POST':
         # try:
-        iduser = request.form
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', iduser)
-        iduser_id = dict(iduser)
-        iduser_id = next(iter((iduser_id.items())) )
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ไหมอยากเห็นนนนนนนนนนน', iduser_id)
-        if iduser_id[0] == 'cooking':
-            sql = "UPDATE queue_user SET status = '1' WHERE iduser = %s"
-            curs.execute(sql, (iduser_id[1], ))
+        orderiduser = request.form
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', orderiduser)
+        orderiduser_id = dict(orderiduser)
+        orderiduser_id = next(iter((orderiduser_id.items())) )
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ไหมอยากเห็นนนนนนนนนนน', orderiduser_id)
+        if orderiduser_id[0] == 'cooking':
+            sql = "UPDATE queue_user SET status = '1' WHERE orderid = %s"
+            curs.execute(sql, (orderiduser_id[1], ))
             connection.commit()
-        elif iduser_id[0] == 'complete':
-            sql = "SELECT iduser, tableuser, totalprice, orderid FROM queue_user WHERE iduser = %s"
-            curs.execute(sql, (iduser_id[1], ))
+        elif orderiduser_id[0] == 'complete':
+            sql = "SELECT iduser, tableuser, totalprice, orderid FROM queue_user WHERE orderid = %s"
+            curs.execute(sql, (orderiduser_id[1], ))
             user_data = curs.fetchall()
             for data in user_data:
                 user_data = data
@@ -208,7 +207,7 @@ def admin_menu():
             sql = "INSERT INTO complete_user (iduser, tableuser, totalprice, orderid) VALUES (%s, %s, %s, %s)"
             curs.execute(sql, user_data)
             sql = "DELETE FROM queue_user WHERE orderid = %s"
-            curs.execute(sql, (iduser_id[1], ))
+            curs.execute(sql, (orderiduser_id[1], ))
             connection.commit()
     curs.execute('SELECT * FROM queue_user')
     order_admin = curs.fetchall()
@@ -222,9 +221,10 @@ def admin_menu():
         #     print(item_menu)
         # print('----------------------------------------------------------------------')
         orderr = [list(i) for i in orderr]
+        cost = sum(float(i[6]) for i in orderr)
         for menu in orderr:
             menu[4] = json.loads(menu[4].replace("'", '"'))
-        order_list += [orderr]
+        order_list += [[orderr, cost]]
     print('*************** order_list *******************************************************')
     for stuff in order_list:
         print('=====>', stuff)
@@ -252,9 +252,10 @@ def yourorder():
         #     print(item_menu)
         # print('----------------------------------------------------------------------')
         orderr = [list(i) for i in orderr]
+        cost = sum(float(i[6]) for i in orderr)
         for menu in orderr:
             menu[4] = json.loads(menu[4].replace("'", '"'))
-        order_list += [orderr]
+        order_list += [[orderr, cost]]
     print('*************** order_list *******************************************************')
     print(*order_list, sep='\n')
     print('**********************************************************************************')
@@ -305,21 +306,23 @@ def admin_account():
 def admin_menu_success():
     if request.method == 'POST':
         # try:
-        iduser = request.form
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', iduser)
-        iduser_id = dict(iduser)
-        iduser_id = next(iter((iduser_id.items())) )
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', iduser_id)
-        sql = "SELECT iduser, tableuser, totalprice FROM complete_user WHERE iduser = %s"
-        curs.execute(sql, (iduser_id[1], ))
+        orderiduser = request.form
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', orderiduser)
+        orderiduser_id = dict(orderiduser)
+        orderiduser_id = next(iter((orderiduser_id.items())) )
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', orderiduser_id)
+        sql = "SELECT totalprice FROM complete_user WHERE orderid = %s"
+        curs.execute(sql, (orderiduser_id[1], ))
         user_data = curs.fetchall()
         for data in user_data:
             user_data = data
         print('user_data >>>>>>>>>>>>>>>>>>>>>>>>', user_data)
-        sql = "INSERT INTO paid_user (iduser, tableuser, totalprice) VALUES (%s, %s, %s)"
-        curs.execute(sql, user_data)
-        sql = "DELETE FROM complete_user WHERE iduser = %s"
-        curs.execute(sql, (iduser_id[1], ))
+        today = date.today()
+        date_paid = today.strftime("%B %d, %Y")
+        sql = "INSERT INTO complete_paid (totalprice, date_month_year) VALUES (%s, %s)"
+        curs.execute(sql, (user_data[0], date_paid))
+        sql = "DELETE FROM complete_user WHERE orderid = %s"
+        curs.execute(sql, (orderiduser_id[1], ))
         connection.commit()
     curs.execute('SELECT * FROM complete_user')
     order_admin = curs.fetchall()
@@ -333,9 +336,10 @@ def admin_menu_success():
         #     print(item_menu)
         # print('----------------------------------------------------------------------')
         orderr = [list(i) for i in orderr]
+        cost = sum(float(i[6]) for i in orderr)
         for menu in orderr:
             menu[4] = json.loads(menu[4].replace("'", '"'))
-        order_list += [orderr]
+        order_list += [[orderr, cost]]
     print('*************** order_list *******************************************************')
     for stuff in order_list:
         print('=====>', stuff)

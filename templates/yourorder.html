@@ -26,7 +26,7 @@
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
-                <strong class="d-inline-block text-primary">{{table.0.1}} {{table.0.2}}</strong>
+                <strong class="d-inline-block text-primary">{{table.0.0.1}} {{table.0.0.2}}</strong>
               </button>
             </h2>
             <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
@@ -42,7 +42,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for menu in table %}
+                            {% for menu in table[0] %}
                             <tr>
                                 <th scope="row">{{ menu.5 }}</th>
                                 <td>
@@ -61,7 +61,7 @@
                             <tr>
                                 <th scope="col">รวม</th>
                                 <th scope="col"></th>
-                                <th>62</th>
+                                <th>{{ table[1] }}</th>
                             </tr>
                         </tfoot>
                     </table>

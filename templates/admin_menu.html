@@ -23,20 +23,20 @@
     </div>
     <div class="container" style="padding-top: 64px; padding-bottom: 64px;">
         {% for table in datas %}
-        <form method="post" action="" id={{table.0.1}}>
+        <form method="post" action="" id={{table.0.0.7}}>
         <div class="accordion" id="accordionPanelsStayOpenExample">
           <div class="accordion-item">
             <h2 class="accordion-header" id="panelsStayOpen-headingOne">
               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
-                <strong class="d-inline-block text-primary">{{table.0.1}} {{table.0.2}}</strong>
+                <strong class="d-inline-block text-primary">{{table.0.0.1}} {{table.0.0.2}}</strong>
               </button>
             </h2>
             <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
               <div class="accordion-body">
                 <div class="col-md-12">
                   <div class="col d-flex flex-column position-static">
-                      <button class="btn btn-outline-primary" type="submit" name="cooking" value={{table.0.1}} form={{table.0.1}}>กำลังปรุง</button>
-                      <button class="btn btn-outline-primary" type="submit" name="complete" value={{table.0.1}} form={{table.0.1}}>เสร็จสิ้น</button>
+                      <button class="btn btn-outline-primary" type="submit" name="cooking" value={{table.0.0.7}} form={{table.0.0.7}}>กำลังปรุง</button>
+                      <button class="btn btn-outline-primary" type="submit" name="complete" value={{table.0.0.7}} form={{table.0.0.7}}>เสร็จสิ้น</button>
                     <table class="table" style="margin-bottom: 0;">
                         <thead>
                             <tr>
@@ -46,7 +46,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for menu in table %}
+                            {% for menu in table[0] %}
                             <tr>
                                 <th scope="row">{{ menu.5 }}</th>
                                 <td>
@@ -65,7 +65,7 @@
                             <tr>
                                 <th scope="col">รวม</th>
                                 <th scope="col"></th>
-                                <th>62</th>
+                                <th>{{ table[1] }}</th>
                             </tr>
                         </tfoot>
                     </table>

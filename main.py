@@ -297,10 +297,23 @@ def admin_home():
 
 @app.route('/admin_account', methods=['GET', 'POST'])
 def admin_account():
-    curs.execute('SELECT totalprice FROM complete_user')
-    money = curs.fetchall()
-    money = [int(i[0]) for i in money]
-    return render_template('admin_account.html', money=sum(money))
+    curs.execute('SELECT date_month_year FROM complete_paid')
+    date_day = list(set(curs.fetchall()))
+    date_day = [i[0].replace("'", '') for i in date_day]
+    curs.execute("SELECT menu, num FROM orderuser")
+    menu = curs.fetchall()
+    dic_menu = {}
+    for item in menu:
+        if item[0] in dic_menu:
+            dic_menu[item[0]] += int(item[1])
+        else:
+            dic_menu[item[0]] = int(item[1])
+    list_menu = []
+    for i, j in dic_menu.items():
+        list_menu.append([j, i])
+    list_menu.sort(reverse=True)
+    print(list_menu)
+    return render_template('admin_account.html', datas=date_day, menu=list_menu)
 
 @app.route('/admin_menu_success', methods=['GET', 'POST'])
 def admin_menu_success():

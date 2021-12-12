@@ -21,24 +21,26 @@
             </div>
         </nav>
     </div>
-    <div class="container" style="padding-top: 74px; padding-bottom: 64px;">
+    <div class="container" style="padding-top: 74px; padding-bottom: 20px;">
+        <form method='post' action={{ url_for('.admin_account') }}>
         <div align="center">
             <h4 style="margin-bottom: 20px;">เลือกวันที่ที่ต้องการดูบัญชี</h4>
             <div class="input-group mb-3">
-                <select class="form-select" name='table'>
+                <select class="form-select" name="date">
                     <option selected>เลือกทั้งหมด</option>
                     {% for i in datas %}
                     <option value={{i}}>{{i}}</option>
                     {% endfor %}
                 </select>
-                <button class="btn btn-outline-secondary" type="button" id="button-addon2">ดูบัญชี</button>
+                <button class="btn btn-outline-secondary" type="submit" >ดูบัญชี</button>
             </div>
-        <br>
         </div>
-        <p>ได้เงินทั้งหมด  บาท</p>
+        </form>
+        <p align="center" style="color: rgb(0, 98, 255);" >{{ date }}</p>
+        <h4 align="center" style="color: rgb(255, 0, 0);" >ได้เงิน {{ money }} บาท</h4>
     </div>
     <div align="center">
-        <h4>รายการสินค้าที่ขายได้ทั้งหมด</h4>
+        <h5>รายการสินค้าที่ขายได้ทั้งหมด</h5>
         <div class="container">
             <table class="table">
                 <thead>
@@ -48,10 +50,10 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for i in menu %}
+                {% for j in menu %}
                 <tr>
-                    <td>{{ i[1] }}</td>
-                    <td>{{ i[0] }}</td>
+                    <td>{{ j[1] }}</td>
+                    <td>{{ j[0] }}</td>
                 </tr>
                 {% endfor %}
                 </tbody>

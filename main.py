@@ -1,4 +1,5 @@
 """ก๋วยเตี๋ยวร่มลื่น"""
+from weakref import ProxyTypes
 from flask import Flask, render_template, request, redirect, url_for
 from flask.scaffold import F
 import mysql.connector
@@ -186,6 +187,7 @@ def complete():
 @app.route('/admin_menu', methods=['GET', 'POST'])
 def admin_menu():
     '''หน้าเว็บฝั่งแม่ค้า'''
+    cook = 'กำลังปรุง'
     if request.method == 'POST':
         # try:
         orderiduser = request.form
@@ -194,7 +196,7 @@ def admin_menu():
         orderiduser_id = next(iter((orderiduser_id.items())) )
         print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ไหมอยากเห็นนนนนนนนนนน', orderiduser_id)
         if orderiduser_id[0] == 'cooking':
-            sql = "UPDATE queue_user SET status = '1' WHERE orderid = %s"
+            sql = "UPDATE queue_user SET status = 'กำลังปรุง' WHERE orderid = %s"
             curs.execute(sql, (orderiduser_id[1], ))
             connection.commit()
         elif orderiduser_id[0] == 'complete':
@@ -216,6 +218,10 @@ def admin_menu():
         sql = 'SELECT * FROM orderuser WHERE (iduser, tableuser, orderid) = (%s, %s, %s)'
         curs.execute(sql, (item[1], item[2], item[6]))
         orderr = curs.fetchall()
+        if item[4] == 1:
+            cook = '*** กำลังปรุงอยู่ ***'
+        elif item[4] == 0:
+            cook = 'กำลังปรุง'
         print(item[0], end='\n')
         # for item_menu in orderr:
         #     print(item_menu)
@@ -224,7 +230,7 @@ def admin_menu():
         cost = sum(float(i[6]) for i in orderr)
         for menu in orderr:
             menu[4] = json.loads(menu[4].replace("'", '"'))
-        order_list += [[orderr, cost]]
+        order_list += [[orderr, cost, cook]]
     print('*************** order_list *******************************************************')
     for stuff in order_list:
         print('=====>', stuff)
@@ -234,28 +240,28 @@ def admin_menu():
 @app.route('/yourorder', methods=['GET', 'POST'])
 def yourorder():
     '''รายการอาหารของลูกค้า'''
-    sql = 'SELECT * FROM queue_user WHERE iduser = %s'
+    sql = 'SELECT iduser, tableuser, orderid, status FROM queue_user WHERE iduser = %s'
     curs.execute(sql, (myid, ))
     order_admin = curs.fetchall()
-    if order_admin == '':
-        sql = 'SELECT * FROM complete_user WHERE iduser = %s'
-        curs.execute(sql, (myid, ))
-        order_admin = curs.fetchall()
+    sql = 'SELECT iduser, tableuser, orderid, status FROM complete_user WHERE iduser = %s'
+    curs.execute(sql, (myid, ))
+    order_admin += curs.fetchall()
+    print(order_admin)
     order_list = []
     for item in order_admin:
         print(item)
         sql = 'SELECT * FROM orderuser WHERE (iduser, tableuser, orderid) = (%s, %s, %s)'
-        curs.execute(sql, (item[1], item[2], item[6]))
+        curs.execute(sql, (item[0], item[1], item[2]))
         orderr = curs.fetchall()
-        print(item[0], end='\n')
-        # for item_menu in orderr:
-        #     print(item_menu)
-        # print('----------------------------------------------------------------------')
         orderr = [list(i) for i in orderr]
         cost = sum(float(i[6]) for i in orderr)
         for menu in orderr:
             menu[4] = json.loads(menu[4].replace("'", '"'))
-        order_list += [[orderr, cost]]
+        queue = item[3]
+        if item[3] == '0':
+            curs.execute('SELECT orderid FROM queue_user')
+            queue = 'อีก ' + str(curs.fetchall().index((orderr[0][7],))+1) + ' คิว'
+        order_list += [[orderr, cost, queue]]
     print('*************** order_list *******************************************************')
     print(*order_list, sep='\n')
     print('**********************************************************************************')
@@ -299,7 +305,7 @@ def admin_home():
 def admin_account():
     curs.execute('SELECT date_month_year FROM complete_paid')
     date_day = list(set(curs.fetchall()))
-    date_day = [i[0].replace("'", '') for i in date_day]
+    date_day = [i[0].replace("'", '').replace(' ', '-') for i in date_day]
     curs.execute("SELECT menu, num FROM orderuser")
     menu = curs.fetchall()
     dic_menu = {}
@@ -313,7 +319,24 @@ def admin_account():
         list_menu.append([j, i])
     list_menu.sort(reverse=True)
     print(list_menu)
-    return render_template('admin_account.html', datas=date_day, menu=list_menu)
+    money = 0
+    curs.execute('SELECT totalprice FROM complete_paid')
+    price = curs.fetchall()
+    for item in price:
+        money += item[0]
+    if request.method == 'POST':
+        date = request.form['date'].replace('-', ' ')
+        if date != 'เลือกทั้งหมด':
+            money = 0
+        sql = 'SELECT totalprice FROM complete_paid WHERE date_month_year = %s'
+        curs.execute(sql, (date, ))
+        price = curs.fetchall()
+        for item in price:
+            money += item[0]
+        print(date)
+        print(date_day)
+        print('อิอิ')
+    return render_template('admin_account.html', datas=date_day, menu=list_menu, money=money, date=date)
 
 @app.route('/admin_menu_success', methods=['GET', 'POST'])
 def admin_menu_success():

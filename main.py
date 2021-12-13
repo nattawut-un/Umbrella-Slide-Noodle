@@ -17,20 +17,62 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_DATABASE = os.getenv('DB_DATABASE')
 print('>>>', DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE)
 app = Flask(__name__)
-connection = mysql.connector.connect(
-    host=DB_HOST,
-    port=3306,
-    user=DB_USER,
-    password=DB_PASSWORD,
-    database=DB_DATABASE
-)
+# connection = mysql.connector.connect(
+#     host=DB_HOST,
+#     port=3306,
+#     user=DB_USER,
+#     password=DB_PASSWORD,
+#     database=DB_DATABASE
+# )
 
-
-curs = connection.cursor()
+# curs = connection.cursor()
 myname = ''
 myid = ''
 pick = ''
 order_id = ''
+
+class DB:
+    conn = None # connection
+    curs = None # cursor
+
+    def connect(self):
+        print('DATABASE: Connecting...')
+        self.conn = mysql.connector.connect(
+            host=DB_HOST,
+            port=3306,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_DATABASE
+        )
+        self.curs = self.conn.cursor()
+        print('DATABASE: Connected.')
+
+    def query(self, sql, values):
+        try:
+            print('DATABASE: Querying...:', sql, 'values:', values)
+            self.curs.execute(sql, values)
+        except: # reconnect when timeout
+            print('DATABASE: Error, reconnecting...')
+            self.connect()
+            print('DATABASE: Querying...:', sql, 'values:', values)
+            self.curs.execute(sql, values)
+        finally:
+            print('DATABASE: Query finished.')
+        return self.curs
+
+    def save(self):
+        print('DATABASE: Committing changes...')
+        self.conn.commit()
+        print('DATABASE: Committed.')
+
+    def fetch(self):
+        print('DATABASE: Fetching data...')
+        yea = self.curs.fetchall()
+        print('DATABASE: Fetched.')
+        return yea
+
+database = DB()
+database.connect()
 
 @app.route('/')
 def firstpage():
@@ -61,21 +103,21 @@ def home():
         print(myname, myid)
         print('=====================')
         sql = 'INSERT INTO users (id, name, menus) VALUES (%s, %s, %s)'
-        curs.execute(sql, (myid, myname, '[]'))
-        connection.commit()
+        database.query(sql, (myid, myname, '[]'))
+        database.save()
     return render_template('home.html', myname=myname, myid=myid)
 
 @app.route('/menus', methods=['GET', 'POST'])
 def menus():
     ''' ดึงเมนูมาแสดง '''
-    curs.execute('SELECT * FROM menus')
-    menu = curs.fetchall()
-    curs.execute('SELECT type FROM options')
-    options = [i[0] for i in curs.fetchall()]
+    database.query('SELECT * FROM menus', ())
+    menu = database.fetch()
+    database.query('SELECT type FROM options', ())
+    options = list(set([i[0] for i in database.fetch()]))
     all_picked_options = []
     sql = ('SELECT price FROM menus WHERE name = %s')
-    curs.execute(sql, (pick, ))
-    main_price = curs.fetchall()
+    database.query(sql, (pick, ))
+    main_price = database.fetch()
     for i in main_price:
         main_price = i[0]
     if request.method == 'GET':
@@ -83,7 +125,9 @@ def menus():
         order_id = random.randrange(0, 1000000)
         print(order_id)
     if request.method == 'POST':
+        print('options >>>', options)
         for group in options:
+            print('group >>>>>', group)
             item = request.form.getlist(group)
             all_picked_options += item
             if item == ['พิเศษ']:
@@ -93,8 +137,8 @@ def menus():
         main_price *= int(num)
         print(pick, all_picked_options, myname, myid)
         sql = 'INSERT INTO orderuser (iduser, tableuser, menu, orderoption, num, price, orderid) VALUES (%s, %s, %s, %s, %s, %s, %s)'
-        curs.execute(sql, (myid, myname, pick, all_picked_options, num, main_price, order_id))
-        connection.commit()
+        database.query(sql, (myid, myname, pick, all_picked_options, num, main_price, order_id))
+        database.save()
     return render_template('menu.html', datas=menu)
 
 @app.route('/options', methods=['GET', 'POST'])
@@ -104,15 +148,15 @@ def options():
         global pick
         pick = request.form['pick']
         sql = 'SELECT price, next FROM menus WHERE name = %s'
-        curs.execute(sql, (pick, ))
-        price_next = curs.fetchall()
+        database.query(sql, (pick, ))
+        price_next = database.fetch()
         for item in price_next:
             main_price = item[0]
             next_option = item[1]
             print(main_price, next_option)
         sql = 'SELECT * FROM options WHERE name = %s'
-        curs.execute(sql, (next_option, ))
-        option_menu = curs.fetchall()
+        database.query(sql, (next_option, ))
+        option_menu = database.fetch()
         items = {}
         for i in option_menu:
             yea = json.loads(i[3].replace("'", '"'))
@@ -132,33 +176,33 @@ def order_summary():
         else:
             sql = 'DELETE FROM orderuser WHERE (id, iduser, orderid) = (%s, %s, %s)'
             vals = (lob, myid, order_id, )
-        curs.execute(sql, vals)
-        connection.commit()
+        database.query(sql, vals)
+        database.save()
     sql = 'SELECT iduser, tableuser FROM orderuser WHERE orderid = %s'
-    curs.execute(sql, (order_id, ))
-    id_table = curs.fetchall()
+    database.query(sql, (order_id, ))
+    id_table = database.fetch()
     print('id_table >>>>>>>>>>', id_table)
 
     sql = 'SELECT menu, num, price FROM orderuser WHERE orderid = %s'
-    curs.execute(sql, (order_id, ))
-    user_get = curs.fetchall()
+    database.query(sql, (order_id, ))
+    user_get = database.fetch()
     print('user_get >>>>>>>>>>', user_get)
 
     sql = 'SELECT price FROM orderuser WHERE orderid = %s'
-    curs.execute(sql, (order_id, ))
-    price = curs.fetchall()
+    database.query(sql, (order_id, ))
+    price = database.fetch()
     cost = sum(float(i[0]) for i in price)
     print('ราคาาาาาาาาาาาาาาาาาาา', price, cost)
 
     sql = 'SELECT id FROM orderuser WHERE orderid = %s'
-    curs.execute(sql, (order_id, ))
-    menu_id = curs.fetchall()
+    database.query(sql, (order_id, ))
+    menu_id = database.fetch()
     menu_id = [i[0] for i in menu_id]
     print('menu_id >>>>>>>>>>>>', menu_id)
 
     optionuser = 'SELECT orderoption FROM orderuser WHERE orderid = %s'
-    curs.execute(optionuser, (order_id, ))
-    get_option = curs.fetchall()
+    database.query(optionuser, (order_id, ))
+    get_option = database.fetch()
     print(get_option)
     options = []
     for item in get_option:
@@ -174,14 +218,14 @@ def order_summary():
 def complete():
     '''คิว'''
     sql = 'SELECT price FROM orderuser WHERE iduser = %s'
-    curs.execute(sql, (myid, ))
-    price = curs.fetchall()
+    database.query(sql, (myid, ))
+    price = database.fetch()
     cost = sum(float(i[0]) for i in price)
     sql = 'INSERT INTO queue_user (iduser, tableuser, totalprice, ordertime, orderid) VALUES (%s, %s, %s, %s, %s)'
-    curs.execute(sql, (myid, myname, cost, str(datetime.now()), order_id))
-    connection.commit()
-    curs.execute('SELECT COUNT(*) FROM queue_user')
-    queue = curs.fetchall()
+    database.query(sql, (myid, myname, cost, str(datetime.now()), order_id))
+    database.save()
+    database.query('SELECT COUNT(*) FROM queue_user', ())
+    queue = database.fetch()
     #print('queue >>>>>>>>>', queue)
     return render_template('complete.html', queue=queue[0][0])
 
@@ -198,27 +242,27 @@ def admin_menu():
         print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ไหมอยากเห็นนนนนนนนนนน', orderiduser_id)
         if orderiduser_id[0] == 'cooking':
             sql = "UPDATE queue_user SET status = 'กำลังปรุง' WHERE orderid = %s"
-            curs.execute(sql, (orderiduser_id[1], ))
-            connection.commit()
+            database.query(sql, (orderiduser_id[1], ))
+            database.save()
         elif orderiduser_id[0] == 'complete':
             sql = "SELECT iduser, tableuser, totalprice, orderid FROM queue_user WHERE orderid = %s"
-            curs.execute(sql, (orderiduser_id[1], ))
-            user_data = curs.fetchall()
+            database.query(sql, (orderiduser_id[1], ))
+            user_data = database.fetch()
             for data in user_data:
                 user_data = data
             print('user_data >>>>>>>>>>>>>>>>>>>>>>>>', user_data)
             sql = "INSERT INTO complete_user (iduser, tableuser, totalprice, orderid) VALUES (%s, %s, %s, %s)"
-            curs.execute(sql, user_data)
+            database.query(sql, user_data)
             sql = "DELETE FROM queue_user WHERE orderid = %s"
-            curs.execute(sql, (orderiduser_id[1], ))
-            connection.commit()
-    curs.execute('SELECT * FROM queue_user')
-    order_admin = curs.fetchall()
+            database.query(sql, (orderiduser_id[1], ))
+            database.save()
+    database.query('SELECT * FROM queue_user', ())
+    order_admin = database.fetch()
     order_list = []
     for item in order_admin:
         sql = 'SELECT * FROM orderuser WHERE (iduser, tableuser, orderid) = (%s, %s, %s)'
-        curs.execute(sql, (item[1], item[2], item[6]))
-        orderr = curs.fetchall()
+        database.query(sql, (item[1], item[2], item[6]))
+        orderr = database.fetch()
         if item[4] == 'กำลังปรุง':
             cook = '*** กำลังปรุงอยู่ ***'
         elif item[4] == 0:
@@ -242,29 +286,29 @@ def admin_menu():
 def yourorder():
     '''รายการอาหารของลูกค้า'''
     sql = 'SELECT orderid, status FROM queue_user WHERE iduser = %s'
-    curs.execute(sql, (myid, ))
-    order_admin = curs.fetchall()
+    database.query(sql, (myid, ))
+    order_admin = database.fetch()
     sql = 'SELECT orderid, status FROM complete_user WHERE iduser = %s'
-    curs.execute(sql, (myid, ))
-    order_admin += curs.fetchall()
+    database.query(sql, (myid, ))
+    order_admin += database.fetch()
     sql = 'SELECT orderid, status FROM complete_paid WHERE iduser = %s'
-    curs.execute(sql, (myid, ))
-    order_admin += curs.fetchall()
+    database.query(sql, (myid, ))
+    order_admin += database.fetch()
     print(order_admin)
     order_list = []
     for item in order_admin:
         print(item)
         sql = 'SELECT * FROM orderuser WHERE orderid = %s'
-        curs.execute(sql, (item[0],))
-        orderr = curs.fetchall()
+        database.query(sql, (item[0],))
+        orderr = database.fetch()
         orderr = [list(i) for i in orderr]
         cost = sum(float(i[6]) for i in orderr)
         for menu in orderr:
             menu[4] = json.loads(menu[4].replace("'", '"'))
         queue = item[1]
         if item[1] == '0':
-            curs.execute('SELECT orderid FROM queue_user')
-            queue = 'อีก ' + str(curs.fetchall().index((orderr[0][7],))+1) + ' คิว'
+            database.query('SELECT orderid FROM queue_user', ())
+            queue = 'อีก ' + str(database.fetch().index((orderr[0][7],))+1) + ' คิว'
         order_list += [[orderr, cost, queue]]
     print('*************** order_list *******************************************************')
     print(*order_list, sep='\n')
@@ -274,24 +318,24 @@ def yourorder():
 @app.route('/money')
 def money():
     sql = 'SELECT iduser, tableuser FROM orderuser WHERE iduser = %s'
-    curs.execute(sql, (myid, ))
-    id_table = curs.fetchall()
+    database.query(sql, (myid, ))
+    id_table = database.fetch()
     print(id_table)
 
     sql = 'SELECT menu, num, price FROM orderuser WHERE iduser = %s'
-    curs.execute(sql, (myid, ))
-    user_get = curs.fetchall()
+    database.query(sql, (myid, ))
+    user_get = database.fetch()
     print(user_get)
 
     sql = 'SELECT price FROM orderuser WHERE iduser = %s'
-    curs.execute(sql, (myid, ))
-    price = curs.fetchall()
+    database.query(sql, (myid, ))
+    price = database.fetch()
     cost = sum(float(i[0]) for i in price)
     print('ราคาาาาาาาาาาาาาาาาาา', price, cost)
 
     optionuser = 'SELECT orderoption FROM orderuser WHERE iduser = %s'
-    curs.execute(optionuser, (myid, ))
-    get_option = curs.fetchall()
+    database.query(optionuser, (myid, ))
+    get_option = database.fetch()
     print(get_option)
     options = []
     for item in get_option:
@@ -307,11 +351,11 @@ def admin_home():
 
 @app.route('/admin_account', methods=['GET', 'POST'])
 def admin_account():
-    curs.execute('SELECT date_month_year FROM complete_paid')
-    date_day = list(set(curs.fetchall()))
+    database.query('SELECT date_month_year FROM complete_paid', ())
+    date_day = list(set(database.fetch()))
     date_day = [i[0].replace("'", '').replace(' ', '-') for i in date_day]
-    curs.execute("SELECT menu, num FROM orderuser")
-    menu = curs.fetchall()
+    database.query("SELECT menu, num FROM orderuser", ())
+    menu = database.fetch()
     dic_menu = {}
     for item in menu:
         if item[0] in dic_menu:
@@ -324,8 +368,8 @@ def admin_account():
     list_menu.sort(reverse=True)
     print(list_menu)
     money = 0
-    curs.execute('SELECT totalprice FROM complete_paid')
-    price = curs.fetchall()
+    database.query('SELECT totalprice FROM complete_paid', ())
+    price = database.fetch()
     for item in price:
         money += item[0]
     date = 'เลือกทั้งหมด'
@@ -334,8 +378,8 @@ def admin_account():
         if date != 'เลือกทั้งหมด':
             money = 0
         sql = 'SELECT totalprice FROM complete_paid WHERE date_month_year = %s'
-        curs.execute(sql, (date, ))
-        price = curs.fetchall()
+        database.query(sql, (date, ))
+        price = database.fetch()
         for item in price:
             money += item[0]
         print(date)
@@ -353,25 +397,25 @@ def admin_menu_success():
         orderiduser_id = next(iter((orderiduser_id.items())) )
         print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', orderiduser_id)
         sql = "SELECT totalprice, iduser, orderid FROM complete_user WHERE orderid = %s"
-        curs.execute(sql, (orderiduser_id[1], ))
-        user_data = curs.fetchall()
+        database.query(sql, (orderiduser_id[1], ))
+        user_data = database.fetch()
         for data in user_data:
             user_data = data
         print('user_data >>>>>>>>>>>>>>>>>>>>>>>>', user_data)
         today = date.today()
         date_paid = today.strftime("%B %d, %Y")
         sql = "INSERT INTO complete_paid (totalprice, date_month_year, iduser, orderid) VALUES (%s, %s, %s, %s)"
-        curs.execute(sql, (user_data[0], date_paid, user_data[1], user_data[2]))
+        database.query(sql, (user_data[0], date_paid, user_data[1], user_data[2]))
         sql = "DELETE FROM complete_user WHERE orderid = %s"
-        curs.execute(sql, (orderiduser_id[1], ))
-        connection.commit()
-    curs.execute('SELECT * FROM complete_user')
-    order_admin = curs.fetchall()
+        database.query(sql, (orderiduser_id[1], ))
+        database.save()
+    database.query('SELECT * FROM complete_user', ())
+    order_admin = database.fetch()
     order_list = []
     for item in order_admin:
         sql = 'SELECT * FROM orderuser WHERE (iduser, tableuser, orderid) = (%s, %s, %s)'
-        curs.execute(sql, (item[1], item[2], item[4]))
-        orderr = curs.fetchall()
+        database.query(sql, (item[1], item[2], item[4]))
+        orderr = database.fetch()
         print(item[0], end='\n')
         # for item_menu in orderr:
         #     print(item_menu)
